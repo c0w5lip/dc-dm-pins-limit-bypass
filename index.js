@@ -37,7 +37,17 @@ client.on('messageCreate', async (message) => {
 
       const stackMessage = await message.channel.messages.fetch(stacks['currentStack']);
 
-      stackMessage.edit(stackMessage.content + '\n' + messageToPin.url); // nice presentation to do
+      var date = new Date(messageToPin.createdTimestamp);
+      var d = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
+
+      let messagePreview = messageToPin.content.substring(0, 16);
+      if (parseInt(messageToPin.content.length, 10) > 16 ) {
+        messagePreview = messagePreview + '...';
+      }
+
+      stackMessage.edit(stackMessage.content + '\n' +
+       '✰ ' + messageToPin.url + ' ✎ "' + messagePreview + '"' +
+       ' ~『' + d + '』'); // nice presentation to do
     }
 
 
