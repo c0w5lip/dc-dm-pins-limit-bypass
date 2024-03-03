@@ -14,5 +14,5 @@
 - a lot tbh
 
 ## Credit
-- [discord.js-selfbot-v13](https://github.com/aiko-chan-ai/discord.js-selfbot-v13) from @aiko-chan-ai
-- @Leaxolotl for submitting [a nice pull request](https://github.com/c0w5lip/dc-dm-pins-limit-bypass/pull/1/commits/a7318619c609b73ca5471ee9947fbe81d33a0a9d)
+- [discord.js-selfbot-v13](https://github.com/aiko-chan-ai/discord.js-selfbot-v13) from [@aiko-chan-ai](https://github.com/aiko-chan-ai)
+- [@Leaxolotl](https://github.com/Leaxolotl) for submitting [a nice pull request](https://github.com/c0w5lip/dc-dm-pins-limit-bypass/pull/1/commits/a7318619c609b73ca5471ee9947fbe81d33a0a9d)
