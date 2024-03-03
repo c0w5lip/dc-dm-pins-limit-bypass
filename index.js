@@ -23,7 +23,7 @@ async function createNewStack(channel, stackJSONFile) {
   });
 }
 
-async function pushOntoStack(stackMessage, messageToPush) {
+function pushOntoStack(stackMessage, messageToPush) {
   // TODO: handle full stack situation
   /*
   if (parseInt(stackMessage.content.length, 10) + parseInt(messageToPush.content.length, 10) > 2000) {
