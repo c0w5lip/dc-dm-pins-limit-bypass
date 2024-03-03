@@ -41,7 +41,7 @@ function pushOntoStack(stackMessage, messageToPush) {
   let messageToPushFormatting =
     '✰ ' + messageToPush.url +
     ' ✎ "' + messagePreview + '"' +
-    ' ~ 『' + date.getDate().toString().padStart(2, "0") + '/' + (date.getMonth()+1).toString().padStart(2, "0") + '/' + date.getFullYear() + '』';
+    '  ~ 『' + date.getDate().toString().padStart(2, "0") + '/' + (date.getMonth()+1).toString().padStart(2, "0") + '/' + date.getFullYear() + '』';
 
 
   let stackLines = stackMessage.content.split('\n');
