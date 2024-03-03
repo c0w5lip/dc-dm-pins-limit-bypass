@@ -78,11 +78,17 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  if (message.content == 'help') {
-    message.reply(":question: `dc-dm-pins-limit-bypass:` https://github.com/c0w5lip/dc-dm-pins-limit-bypass");
+  if (message.content == '/help') {
+    let helpMessageContent = '__dc-dm-pins-limit-bypass__:\n' +
+    '`/pin` (replying to message): pin a message\n' +
+    '`/unpin` (replying to message): unpin a message\n' +
+    '`/stack`: get a link to your stack\n' + ' \n' +
+    'Any issue? A question?:\n' +
+    '**https://github.com/c0w5lip/dc-dm-pins-limit-bypass** - @c0w5lip'
+    message.reply(helpMessageContent);
   }
   
-  if (message.content == 'pin') {
+  if (message.content == '/pin') {
     if (!message.reference) {
       message.edit(':x: `dc-dm-pins-limit-bypass: you must quote a message to pin it`');
       return;
@@ -99,7 +105,7 @@ client.on('messageCreate', async (message) => {
     pushOntoStack(stackMessage, await message.channel.messages.fetch(message.reference.messageId));
   }
 
-  if (message.content == 'unpin') {
+  if (message.content == '/unpin') {
     if (!message.reference) {
       message.edit(':x: `dc-dm-pins-limit-bypass: you must quote a message to unpin it`');
       return;
@@ -111,12 +117,12 @@ client.on('messageCreate', async (message) => {
     );
   }
 
-  if (message.content == 'stack') {
+  if (message.content == '/stack') {
     let stackMessage = await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']);
     message.reply(":books: `dc-dm-pins-limit-bypass:` " + stackMessage.url)
   }
 
-  if (message.content == 'stacks') {
+  if (message.content == '/stacks') {
     // TODO: show stacks
   }
 });
