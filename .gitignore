@@ -5,4 +5,4 @@ config.json
 package-lock.json
 package.json
 
-stacks.json
+stack.json

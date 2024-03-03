@@ -1,61 +1,124 @@
-const fs = require('fs');
-const { Client } = require('discord.js-selfbot-v13');
-
 const { token } = require('./config.json');
 
+const fs = require('fs');
+
+const { Client } = require('discord.js-selfbot-v13');
 const client = new Client();
 
+
+const STACK_SEPARATOR = '❀⊱┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄⊰❀';
+
+
+async function createNewStack(channel, stackJSONFile) {
+  return new Promise((resolve, reject) => {
+    channel.send(STACK_SEPARATOR + '\n' + STACK_SEPARATOR).then(stackMessage => {
+      stackJSONFile['id'] = stackMessage.id;
+      fs.writeFileSync('stack.json', JSON.stringify(stackJSONFile));
+
+      resolve(stackMessage);
+      // stackMessage.pin(); // TODO: check if the limit isn't reached
+    }).catch(err => {
+      reject(err);
+    });
+  });
+}
+
+async function pushOntoStack(stackMessage, messageToPush) {
+  // TODO: handle full stack situation
+  /*
+  if (parseInt(stackMessage.content.length, 10) + parseInt(messageToPush.content.length, 10) > 2000) {
+    let newStackMessage = await createNewStack(messageToPush.channel, JSON.parse(fs.readFileSync('stack.json')));
+    pushOntoStack(newStackMessage, messageToPush);
+  }
+  */
+  
+  let messagePreview = messageToPush.content.substring(0, 16);
+  if (parseInt(messageToPush.content.length, 10) > 16 ) {
+    messagePreview += '...';
+  }
+
+  var date = new Date(messageToPush.createdTimestamp);
+  let messageToPushFormatting =
+    '✰ ' + messageToPush.url +
+    ' ✎ "' + messagePreview + '"' +
+    ' ~ 『' + date.getDate().toString().padStart(2, "0") + '/' + (date.getMonth()+1).toString().padStart(2, "0") + '/' + date.getFullYear() + '』';
+
+
+  let stackLines = stackMessage.content.split('\n');
+  stackLines.pop()
+  stackLines.push(messageToPushFormatting, STACK_SEPARATOR);
+  let newStackMessage = stackLines.join('\n');
+
+  stackMessage.edit(newStackMessage);
+}
+
+function popFromStack(stackMessage, messageToPop) {
+  let stackLines = stackMessage.content.split('\n');
+  stackLines.pop()
+
+  stackLines.forEach(line => {
+    if (line.includes(messageToPop.url)) {
+      stackLines.splice(stackLines.indexOf(line), 1); 
+    }
+  });
+
+  stackLines.push(STACK_SEPARATOR);
+  let newStackMessage = stackLines.join('\n');
+
+  stackMessage.edit(newStackMessage);
+}
+
+
 client.on('ready', async () => {
-  console.log('alr');
+  console.log('[+] dc-dm-pins-limit-bypass: ' + client.user.username);
 })
 
 client.on('messageCreate', async (message) => {
+  if (message.author != client.user.id) {
+    return;
+  }
+
+  if (message.content == 'help') {
+    message.reply(":question: `dc-dm-pins-limit-bypass:` https://github.com/c0w5lip/dc-dm-pins-limit-bypass");
+  }
   
   if (message.content == 'pin') {
     if (!message.reference) {
-      console.log('reply to the message you want to pin!');
+      message.edit(':x: `dc-dm-pins-limit-bypass: you must quote a message to pin it`');
       return;
     }
     
-    const messageToPin = await message.channel.messages.fetch(message.reference.messageId);
-
-
-    let stacks = JSON.parse(fs.readFileSync('stacks.json'));
-    if (!stacks['currentStack']) { // no stack
-
-      newStackMessage = message.channel.send("__new stack__").then(newStackMessageSent => { // create new stack and store its id in stacks.json
-        stacks['currentStack'] = newStackMessageSent.id;
-        fs.writeFileSync('stacks.json', JSON.stringify(stacks));
-
-        newStackMessageSent.pin()
-        
-        
-        newStackMessageSent.edit(newStackMessageSent.content + '\n' + messageToPin.url); // nice presentation to do
-      });
-
+    let stackMessage;
+    let stackJSONFile = JSON.parse(fs.readFileSync('stack.json'));
+    if (!stackJSONFile['id']) {
+      stackMessage = await createNewStack(message.channel, stackJSONFile);
     } else {
-
-      const stackMessage = await message.channel.messages.fetch(stacks['currentStack']);
-
-      var date = new Date(messageToPin.createdTimestamp);
-      var d = date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
-
-      let messagePreview = messageToPin.content.substring(0, 16);
-      if (parseInt(messageToPin.content.length, 10) > 16 ) {
-        messagePreview = messagePreview + '...';
-      }
-
-      stackMessage.edit(stackMessage.content + '\n' +
-       '✰ ' + messageToPin.url + ' ✎ "' + messagePreview + '"' +
-       ' ~『' + d + '』'); // nice presentation to do
+      stackMessage = await message.channel.messages.fetch(stackJSONFile['id']);
     }
-
-
-    // TODO: handle full stack: parseInt(stackMessage.content.length, 10) + parseInt(messageToPin.content.length, 10) > 2000
+    
+    pushOntoStack(stackMessage, await message.channel.messages.fetch(message.reference.messageId));
   }
 
-  // unpin
-  // access pinned / list recently pinned
+  if (message.content == 'unpin') {
+    if (!message.reference) {
+      message.edit(':x: `dc-dm-pins-limit-bypass: you must quote a message to unpin it`');
+      return;
+    }
+
+    popFromStack(
+      await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']),
+      await message.channel.messages.fetch(message.reference.messageId)
+    );
+  }
+
+  if (message.content == 'stack') {
+    let stackMessage = await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']);
+    message.reply(":books: `dc-dm-pins-limit-bypass:` " + stackMessage.url)
+  }
+
+  if (message.content == 'stacks') {
+    // TODO: show stacks
+  }
 });
 
 client.login(token);
