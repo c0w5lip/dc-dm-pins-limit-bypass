@@ -110,13 +110,13 @@ client.on('messageCreate', async (message) => {
     }
 
     popFromStack(
-      await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']),
+      await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))[channel.id]),
       await message.channel.messages.fetch(message.reference.messageId)
     );
   }
 
   if (message.content == '/stack') {
-    let stackMessage = await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']);
+    let stackMessage = await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))[channel.id]);
     message.reply(':books: `dc-dm-pins-limit-bypass:` ' + stackMessage.url)
   }
 
