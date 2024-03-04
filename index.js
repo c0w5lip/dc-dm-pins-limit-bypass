@@ -5,25 +5,23 @@ const fs = require('fs');
 const { Client } = require('discord.js-selfbot-v13');
 const client = new Client();
 
-
 const STACK_SEPARATOR = '❀⊱┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄⊰❀';
-
 
 async function createNewStack(channel, stackJSONFile) {
   return new Promise((resolve, reject) => {
     channel.send(STACK_SEPARATOR + '\n' + STACK_SEPARATOR).then(stackMessage => {
-      stackJSONFile['id'] = stackMessage.id;
+      stackJSONFile[channel.id] = stackMessage.id;
       fs.writeFileSync('stack.json', JSON.stringify(stackJSONFile));
 
       resolve(stackMessage);
       // stackMessage.pin(); // TODO: check if the limit isn't reached
-    }).catch(err => {
-      reject(err);
+    }).catch(e => {
+      reject(e);
     });
   });
 }
 
-function pushOntoStack(stackMessage, messageToPush) {
+async function pushOntoStack(stackMessage, messageToPush) {
   // TODO: handle full stack situation
   /*
   if (parseInt(stackMessage.content.length, 10) + parseInt(messageToPush.content.length, 10) > 2000) {
@@ -52,7 +50,7 @@ function pushOntoStack(stackMessage, messageToPush) {
   stackMessage.edit(newStackMessage);
 }
 
-function popFromStack(stackMessage, messageToPop) {
+async function popFromStack(stackMessage, messageToPop) {
   let stackLines = stackMessage.content.split('\n');
   stackLines.pop()
 
@@ -96,10 +94,10 @@ client.on('messageCreate', async (message) => {
     
     let stackMessage;
     let stackJSONFile = JSON.parse(fs.readFileSync('stack.json'));
-    if (!stackJSONFile['id']) {
+    if (!stackJSONFile[message.channel.id]) {
       stackMessage = await createNewStack(message.channel, stackJSONFile);
     } else {
-      stackMessage = await message.channel.messages.fetch(stackJSONFile['id']);
+      stackMessage = await message.channel.messages.fetch(stackJSONFile[message.channel.id]);
     }
     
     pushOntoStack(stackMessage, await message.channel.messages.fetch(message.reference.messageId));
@@ -119,11 +117,17 @@ client.on('messageCreate', async (message) => {
 
   if (message.content == '/stack') {
     let stackMessage = await message.channel.messages.fetch(JSON.parse(fs.readFileSync('stack.json'))['id']);
-    message.reply(":books: `dc-dm-pins-limit-bypass:` " + stackMessage.url)
+    message.reply(':books: `dc-dm-pins-limit-bypass:` ' + stackMessage.url)
   }
 
   if (message.content == '/stacks') {
     // TODO: show stacks
+  }
+
+  if (message.content == "reset") {
+    /*
+    message.reply(':warning: `dc-dm-pins-limit-bypass:`: All the stacks created in every DMs will be deleted, all data will be lost. React with :ok: to continue.')
+    */
   }
 });
 
